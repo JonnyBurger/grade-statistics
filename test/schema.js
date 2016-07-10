@@ -1,5 +1,5 @@
 import test from 'ava';
-import db from './lib/db';
+import db from '../lib/db';
 
 test.beforeEach(async () => {
 	await db.reset();
