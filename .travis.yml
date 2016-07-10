@@ -1,10 +1,11 @@
-before_script:
-  - psql -c 'create database travis_ci_test;' -U postgres
 language: node_js
 node_js:
   - '6'
+addons:
+  postgresql: "9.1"
 services:
   - postgresql
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
 env:
   - PGUSER=postgres PGDATABASE=travis_ci_test
-sudo: required
