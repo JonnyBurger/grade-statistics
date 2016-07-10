@@ -1,0 +1,36 @@
+{
+  "name": "grade-statistics",
+  "version": "0.0.0",
+  "description": "My grand module",
+  "license": "MIT",
+  "repository": "JonnyBurger/grade-statistics",
+  "author": {
+    "name": "Jonny Burger",
+    "email": "jonathanburger11@gmail.com",
+    "url": "jonny.io"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "xo --fix && ava --serial"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    ""
+  ],
+  "dependencies": {
+    "@jonny/uzh-semesters": "^1.1.0",
+    "co": "^4.6.0",
+    "es6-promisify": "^4.1.0",
+    "junk": "^1.0.3",
+    "pg": "^6.0.1",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "ava": "^0.15.1",
+    "xo": "^0.15.0"
+  }
+}
