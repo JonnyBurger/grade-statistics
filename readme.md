@@ -1,6 +1,6 @@
 # grade-statistics [![Build Status](https://travis-ci.org/JonnyBurger/grade-statistics.svg?branch=master)](https://travis-ci.org/JonnyBurger/grade-statistics)
 
-> My grand module
+> System for collecting grades and creating statistics
 
 
 ## Install

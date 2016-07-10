@@ -5,3 +5,10 @@ node_js:
   - '4'
   - '0.12'
   - '0.10'
+services:
+  - postgresql
+env:
+  - PGUSER=postgres
+  - PGDATABASE=travis_ci_test
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
