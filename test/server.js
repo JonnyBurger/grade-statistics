@@ -1,6 +1,6 @@
-var express = require('express');
+import express from 'express';
+import server from '../lib/server';
 var app = express();
-var server = require('../lib/server');
 
 app.get('/', server.router);
 

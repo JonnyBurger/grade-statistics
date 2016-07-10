@@ -7,3 +7,4 @@ services:
   - postgresql
 env:
   - PGUSER=postgres PGDATABASE=travis_ci_test
+sudo: required
