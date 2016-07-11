@@ -16,7 +16,8 @@
     "test": "xo --fix && ava --serial"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "lib"
   ],
   "keywords": [
     ""
