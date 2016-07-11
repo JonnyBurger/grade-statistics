@@ -13,7 +13,9 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "xo --fix && ava --serial"
+    "test": "xo --fix && ava --serial",
+    "import": "node lib/insert-data.js",
+    "init": "node lib/init.js"
   },
   "files": [
     "index.js",
