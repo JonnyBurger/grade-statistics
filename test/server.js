@@ -170,3 +170,35 @@ test('Should not be able to overwrite semester', async t => {
 	let getJson = await getResponse.json();
 	t.is(getJson.total.average, 4);
 });
+
+test('Should be able to delete own grades', async t => {
+	const firstPayload = {
+		user: 'joburg',
+		grades: [
+			{
+				module: 50030855,
+				semester: 'FS15',
+				grade: 4
+			}
+		]
+	};
+	let firstResponse = await doInsert(firstPayload);
+	t.is(firstResponse.status, 200);
+
+	let secondPayload = {
+		user: 'joburg'
+	};
+	let secondResponse = await fetch('http://localhost:2000', {
+		method: 'DELETE',
+		body: JSON.stringify(secondPayload),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+	t.is(secondResponse.status, 200);
+
+	let thirdResponse = await fetch('http://localhost:2000/50030855');
+	let getJson = await thirdResponse.json();
+	t.is(getJson.total.passed, 0);
+	t.is(getJson.detailed.length, 0);
+});
