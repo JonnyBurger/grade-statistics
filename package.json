@@ -23,6 +23,7 @@
   ],
   "dependencies": {
     "@jonny/uzh-semesters": "^1.1.0",
+    "body-parser": "^1.15.2",
     "co": "^4.6.0",
     "es6-promisify": "^4.1.0",
     "express": "^4.14.0",
