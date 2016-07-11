@@ -1,4 +1,5 @@
 import express from 'express';
+import md5 from 'md5';
 import test from 'ava';
 import fetch from 'node-fetch';
 import server from '../lib/server';
@@ -25,7 +26,7 @@ function doInsert(payload) {
 
 test('Should allow insertion of modules', async t => {
 	const payload = {
-		user: 'joburg',
+		user: md5('joburg'),
 		grades: [
 			{
 				module: 50030855,
@@ -54,7 +55,7 @@ test('Should allow insertion of modules', async t => {
 
 test('Should not allow insertion of grade bigger than 6', async t => {
 	const payload = {
-		user: 'joburg',
+		user: md5('joburg'),
 		grades: [
 			{
 				module: 50030856,
@@ -86,7 +87,7 @@ test('Should reject payload without username', async t => {
 
 test('Should reject payload without semester', async t => {
 	const badPayload = {
-		user: 'joburg',
+		user: md5('joburg'),
 		grades: [
 			{
 				module: 50030856,
@@ -101,7 +102,7 @@ test('Should reject payload without semester', async t => {
 
 test('Should reject payload without module', async t => {
 	const badPayload = {
-		user: 'joburg',
+		user: md5('joburg'),
 		grades: [
 			{
 				semester: 'FS14',
@@ -123,7 +124,7 @@ test('Should reject empty payload', async t => {
 
 test('Should reject invalid semester', async t => {
 	const payload = {
-		user: 'joburg',
+		user: md5('joburg'),
 		grades: [
 			{
 				module: 50030856,
@@ -139,7 +140,7 @@ test('Should reject invalid semester', async t => {
 
 test('Should not be able to overwrite semester', async t => {
 	const firstPayload = {
-		user: 'joburg',
+		user: md5('joburg'),
 		grades: [
 			{
 				module: 50030855,
@@ -153,7 +154,7 @@ test('Should not be able to overwrite semester', async t => {
 	t.is(firstResponse.status, 200);
 
 	const secondPayload = {
-		user: 'joburg',
+		user: md5('joburg'),
 		grades: [
 			{
 				module: 50030855,
@@ -173,7 +174,7 @@ test('Should not be able to overwrite semester', async t => {
 
 test('Should be able to delete own grades', async t => {
 	const firstPayload = {
-		user: 'joburg',
+		user: md5('joburg'),
 		grades: [
 			{
 				module: 50030855,
@@ -186,7 +187,7 @@ test('Should be able to delete own grades', async t => {
 	t.is(firstResponse.status, 200);
 
 	let secondPayload = {
-		user: 'joburg'
+		user: md5('joburg')
 	};
 	let secondResponse = await fetch('http://localhost:2000', {
 		method: 'DELETE',
@@ -201,4 +202,21 @@ test('Should be able to delete own grades', async t => {
 	let getJson = await thirdResponse.json();
 	t.is(getJson.total.passed, 0);
 	t.is(getJson.detailed.length, 0);
+});
+
+test('User should be a md5 hash', async t => {
+	const payload = {
+		user: 'joburg',
+		grades: [
+			{
+				module: 50030855,
+				semester: 'FS15',
+				grade: 4
+			}
+		]
+	};
+	let response = await doInsert(payload);
+	let json = await response.json();
+	t.is(response.status, 400);
+	t.regex(json.error, /md5/i);
 });
