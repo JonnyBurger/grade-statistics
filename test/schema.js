@@ -42,6 +42,17 @@ test('Should not allow two entries from the same person', async t => {
 	t.throws(db.insertStat(md5('joburg'), 50314925, 5, 'HS15'));
 });
 
+test('Should tell me if I am opted out', async t => {
+	const result = await db.studentIsOptedIn(md5('joburg'));
+	t.is(result, false);
+});
+
+test('Should tell me if I am opted in', async t => {
+	await db.insertStat(md5('joburg'), 50314925, 4, 'HS15');
+	const result = await db.studentIsOptedIn(md5('joburg'));
+	t.is(result, true);
+});
+
 test('Should correctly insert statistics', async t => {
 	const statistic = {
 		source: 'oecnews Nr. 124',

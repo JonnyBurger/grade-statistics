@@ -220,3 +220,29 @@ test('User should be a md5 hash', async t => {
 	t.is(response.status, 400);
 	t.regex(json.error, /md5/i);
 });
+
+test('Should tell me when I am opted in', async t => {
+	const payload = {
+		user: md5('joburg'),
+		grades: [
+			{
+				module: 50030855,
+				semester: 'FS15',
+				grade: 4
+			}
+		]
+	};
+	await doInsert(payload);
+
+	let response = await fetch('http://localhost:2000/opted-in', {
+		method: 'POST',
+		body: JSON.stringify({
+			user: md5('joburg')
+		}),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+	let json = await response.json();
+	t.is(json.optedIn, true);
+});
