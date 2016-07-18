@@ -8,11 +8,11 @@ test.beforeEach(async () => {
 });
 
 test('Should calculate stats correctly', async t => {
-	await db.insertStat(md5('joburg'), 50314925, 4, 'HS15');
-	await db.insertStat(md5('jabond'), 50314925, 4.5, 'HS15');
-	await db.insertStat(md5('abcdef'), 50314925, 3, 'HS15');
-	await db.insertStat(md5('xyzabc'), 50314925, 6, 'HS14');
-	await db.insertStat(md5('xyzabd'), 50314922, 5, 'HS15');
+	await db.insertStat(md5('joburg'), 50314925, 4, 'HS15', false);
+	await db.insertStat(md5('jabond'), 50314925, 4.5, 'HS15', false);
+	await db.insertStat(md5('abcdef'), 50314925, 3, 'HS15', false);
+	await db.insertStat(md5('xyzabc'), 50314925, 6, 'HS14', false);
+	await db.insertStat(md5('xyzabd'), 50314922, 5, 'HS15', false);
 
 	const result = await db.getStatsBySemester(50314925);
 	t.is(result.rows[0].semester, 'HS15');
@@ -36,10 +36,17 @@ test('Should calculate stats correctly', async t => {
 });
 
 test('Should not allow two entries from the same person', async t => {
-	const result = await db.insertStat(md5('joburg'), 50314925, 4.5, 'HS15');
+	const result = await db.insertStat(md5('joburg'), 50314925, 4.5, 'HS15', false);
 	t.is(result.command, 'INSERT');
 
-	t.throws(db.insertStat(md5('joburg'), 50314925, 5, 'HS15'));
+	t.throws(db.insertStat(md5('joburg'), 50314925, 5, 'HS15', false));
+});
+
+test('Should allow two entries if it is a Wiederholungsprüfung', async t => {
+	const result = await db.insertStat(md5('joburg'), 50314925, 4.5, 'HS15', false);
+	t.is(result.command, 'INSERT');
+
+	t.notThrows(db.insertStat(md5('joburg'), 50314925, 5, 'HS15', true));
 });
 
 test('Should tell me if I am opted out', async t => {
@@ -48,7 +55,7 @@ test('Should tell me if I am opted out', async t => {
 });
 
 test('Should tell me if I am opted in', async t => {
-	await db.insertStat(md5('joburg'), 50314925, 4, 'HS15');
+	await db.insertStat(md5('joburg'), 50314925, 4, 'HS15', false);
 	const result = await db.studentIsOptedIn(md5('joburg'));
 	t.is(result, true);
 });
@@ -68,9 +75,9 @@ test('Should correctly insert statistics', async t => {
 		]
 	};
 	await db.insertPredefined(statistic);
-	await db.insertStat(md5('joburg'), 50030855, 6, 'FS15');
-	await db.insertStat(md5('joburg'), 50030855, 3.5, 'FS14');
-	await db.insertStat(md5('joburg'), 50030855, 6, 'FS13');
+	await db.insertStat(md5('joburg'), 50030855, 6, 'FS15', false);
+	await db.insertStat(md5('joburg'), 50030855, 3.5, 'FS14', false);
+	await db.insertStat(md5('joburg'), 50030855, 6, 'FS13', false);
 	const stats = await db.getAllStats(50030855);
 	t.is(stats.total.passed, 666);
 	t.is(stats.total.average, 4.14);

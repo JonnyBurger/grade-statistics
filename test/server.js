@@ -246,3 +246,17 @@ test('Should tell me when I am opted in', async t => {
 	let json = await response.json();
 	t.is(json.optedIn, true);
 });
+
+test('Should handle Wiederholungsprüfungen', async t => {
+	const payload = {
+		user: 'da17d6edea42bf74fcd26015a9975030',
+		grades: [
+			{semester: 'HS15', module: '50335165', grade: 4.5},
+			{semester: 'HS15', module: '50332398', grade: 4},
+			{semester: 'HS15', module: '50335165', grade: 3}
+		]
+	};
+
+	let response = await doInsert(payload);
+	t.is(response.status, 200);
+});
