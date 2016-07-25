@@ -301,10 +301,10 @@ test('Should reject hash of empty string', async t => {
 		grades: [
 			{semester: 'HS15', module: '50332398', grade: 4}
 		]
-	}
+	};
 
 	let response = await doInsert(payload);
-	t.is(response.status , 400);
+	t.is(response.status, 400);
 });
 
 test('Should reject hash of demo account', async t => {
@@ -313,8 +313,8 @@ test('Should reject hash of demo account', async t => {
 		grades: [
 			{semester: 'HS15', module: '50332398', grade: 4}
 		]
-	}
+	};
 
 	let response = await doInsert(payload);
-	t.is(response.status , 400);
+	t.is(response.status, 400);
 });
