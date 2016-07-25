@@ -248,7 +248,7 @@ test('Should tell me when I am opted in', async t => {
 
 test('Should handle Wiederholungsprüfungen', async t => {
 	const payload = {
-		user: 'da17d6edea42bf74fcd26015a9975030',
+		user: md5('joburg'),
 		grades: [
 			{semester: 'HS15', module: '50335165', grade: 4.5},
 			{semester: 'HS15', module: '50332398', grade: 4},
@@ -262,7 +262,7 @@ test('Should handle Wiederholungsprüfungen', async t => {
 
 test('Should allow to insert new grades', async t => {
 	const payload = {
-		user: 'da17d6edea42bf74fcd26015a9975030',
+		user: md5('joburg'),
 		grades: [
 			{semester: 'HS15', module: '50335165', grade: 4}
 		]
@@ -272,7 +272,7 @@ test('Should allow to insert new grades', async t => {
 	t.is(response.status, 200);
 
 	const payload2 = {
-		user: 'da17d6edea42bf74fcd26015a9975030',
+		user: user('joburg'),
 		grades: [
 			{semester: 'HS15', module: '50335165', grade: 4},
 			{semester: 'FS16', module: '50332398', grade: 5}
@@ -293,4 +293,28 @@ test('Should allow to insert new grades', async t => {
 
 	t.is(json2.total.count, 1);
 	t.is(json2.total.average, 5);
+});
+
+test('Should reject hash of empty string', async t => {
+	const payload = {
+		user: md5(''),
+		grades: [
+			{semester: 'HS15', module: '50332398', grade: 4}
+		]
+	}
+
+	let response = await doInsert(payload);
+	t.is(response.status , 400);
+});
+
+test('Should reject hash of demo account', async t => {
+	const payload = {
+		user: md5('bestande'),
+		grades: [
+			{semester: 'HS15', module: '50332398', grade: 4}
+		]
+	}
+
+	let response = await doInsert(payload);
+	t.is(response.status , 400);
 });
