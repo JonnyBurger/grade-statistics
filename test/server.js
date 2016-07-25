@@ -164,8 +164,7 @@ test('Should not be able to overwrite semester', async t => {
 		]
 	};
 
-	let secondResponse = await doInsert(secondPayload);
-	t.is(secondResponse.status, 400);
+	await doInsert(secondPayload);
 
 	let getResponse = await fetch('http://localhost:2000/50030855');
 	let getJson = await getResponse.json();
@@ -259,4 +258,39 @@ test('Should handle Wiederholungsprüfungen', async t => {
 
 	let response = await doInsert(payload);
 	t.is(response.status, 200);
+});
+
+test('Should allow to insert new grades', async t => {
+	const payload = {
+		user: 'da17d6edea42bf74fcd26015a9975030',
+		grades: [
+			{semester: 'HS15', module: '50335165', grade: 4}
+		]
+	};
+
+	let response = await doInsert(payload);
+	t.is(response.status, 200);
+
+	const payload2 = {
+		user: 'da17d6edea42bf74fcd26015a9975030',
+		grades: [
+			{semester: 'HS15', module: '50335165', grade: 4},
+			{semester: 'FS16', module: '50332398', grade: 5}
+		]
+	};
+
+	let response2 = await doInsert(payload2);
+	t.is(response2.status, 200);
+
+	let module1 = await fetch('http://localhost:2000/50335165');
+	let json1 = await module1.json();
+
+	t.is(json1.total.count, 1);
+	t.is(json1.total.average, 4);
+
+	let module2 = await fetch('http://localhost:2000/50332398');
+	let json2 = await module2.json();
+
+	t.is(json2.total.count, 1);
+	t.is(json2.total.average, 5);
 });
