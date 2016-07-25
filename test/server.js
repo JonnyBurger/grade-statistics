@@ -272,7 +272,7 @@ test('Should allow to insert new grades', async t => {
 	t.is(response.status, 200);
 
 	const payload2 = {
-		user: user('joburg'),
+		user: md5('joburg'),
 		grades: [
 			{semester: 'HS15', module: '50335165', grade: 4},
 			{semester: 'FS16', module: '50332398', grade: 5}
