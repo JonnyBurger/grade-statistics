@@ -4,6 +4,7 @@ import test from 'ava';
 import fetch from 'node-fetch';
 import server from '../lib/server';
 import db from '../lib/db';
+import {MAX_OPTOUTS} from '../lib/config';
 
 test.beforeEach(async () => {
 	await db.reset();
@@ -18,6 +19,30 @@ function doInsert(payload) {
 	return fetch('http://localhost:2000/', {
 		method: 'POST',
 		body: JSON.stringify(payload),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+}
+
+function doDelete(user) {
+	return fetch('http://localhost:2000', {
+		method: 'DELETE',
+		body: JSON.stringify({
+			user: md5(user)
+		}),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+}
+
+function doOptedInRequest(user) {
+	return fetch('http://localhost:2000/opted-in', {
+		method: 'POST',
+		body: JSON.stringify({
+			user: md5(user)
+		}),
 		headers: {
 			'Content-Type': 'application/json'
 		}
@@ -185,22 +210,65 @@ test('Should be able to delete own grades', async t => {
 	let firstResponse = await doInsert(firstPayload);
 	t.is(firstResponse.status, 200);
 
-	let secondPayload = {
-		user: md5('joburg')
-	};
-	let secondResponse = await fetch('http://localhost:2000', {
-		method: 'DELETE',
-		body: JSON.stringify(secondPayload),
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
+	let secondResponse = await doDelete('joburg');
 	t.is(secondResponse.status, 200);
 
 	let thirdResponse = await fetch('http://localhost:2000/50030855');
 	let getJson = await thirdResponse.json();
 	t.is(getJson.total.passed, 0);
 	t.is(getJson.detailed.length, 0);
+});
+
+test('Should count opt-outs correctly', async t => {
+	const payload = {
+		user: md5('joburg'),
+		grades: [
+			{
+				module: 50030855,
+				semester: 'FS15',
+				grade: 4
+			}
+		]
+	};
+	await doInsert(payload);
+	await doDelete('joburg');
+
+	await doInsert(payload);
+	await doDelete('joburg');
+
+	let response = await doOptedInRequest('joburg');
+	let json = await response.json();
+	t.is(json.optedIn, false);
+	t.is(json.optOuts, 2);
+});
+
+test('Should not count opt-out if not opted in', async t => {
+	await doDelete('joburg');
+	let response = await doOptedInRequest('joburg');
+	let json = await response.json();
+	t.is(json.optOuts, 0);
+});
+
+test('Should not allow opt-out after max opt-outs', async t => {
+	const payload = {
+		user: md5('joburg'),
+		grades: [
+			{
+				module: 50030855,
+				semester: 'FS15',
+				grade: 4
+			}
+		]
+	};
+
+	for (let i = 0; i < MAX_OPTOUTS; i++) {
+		await doInsert(payload);
+		await doDelete('joburg');
+	}
+
+	await doInsert(payload);
+	const response = await doDelete('joburg');
+	t.is(response.status, 400);
 });
 
 test('User should be a md5 hash', async t => {
@@ -220,7 +288,7 @@ test('User should be a md5 hash', async t => {
 	t.regex(json.error, /md5/i);
 });
 
-test('Should tell me when I am opted in', async t => {
+test('Should tell me whether I am opted in', async t => {
 	const payload = {
 		user: md5('joburg'),
 		grades: [
@@ -233,15 +301,7 @@ test('Should tell me when I am opted in', async t => {
 	};
 	await doInsert(payload);
 
-	let response = await fetch('http://localhost:2000/opted-in', {
-		method: 'POST',
-		body: JSON.stringify({
-			user: md5('joburg')
-		}),
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
+	let response = await doOptedInRequest('joburg');
 	let json = await response.json();
 	t.is(json.optedIn, true);
 });
@@ -317,4 +377,7 @@ test('Should reject hash of demo account', async t => {
 
 	let response = await doInsert(payload);
 	t.is(response.status, 400);
+
+	let json = await response.json();
+	t.regex(json.error, /demo/i);
 });

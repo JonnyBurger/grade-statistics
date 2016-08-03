@@ -60,6 +60,16 @@ test('Should tell me if I am opted in', async t => {
 	t.is(result, true);
 });
 
+test('Should track an opt-out', async t => {
+	await db.addOptOut(md5('joburg'));
+	const optOuts = await db.studentOptOutCount(md5('joburg'));
+	t.is(optOuts, 1);
+
+	await db.addOptOut(md5('joburg'));
+	const optOuts2 = await db.studentOptOutCount(md5('joburg'));
+	t.is(optOuts2, 2);
+});
+
 test('Should correctly insert statistics', async t => {
 	const statistic = {
 		source: 'oecnews Nr. 124',
