@@ -92,3 +92,13 @@ test('Should correctly insert statistics', async t => {
 	t.is(stats.total.passed, 666);
 	t.is(stats.total.average, 4.14);
 });
+
+test('Weird schema should work', async t => {
+	await db.insertStat('da17d6edea42bf74fcd26015a9975030', 50044544, 4.25, 'HS14', false);
+	await db.insertStat('da17d6edea42bf74fcd26015a9975030', 50044544, 2.75, 'HS13', false);
+	await db.insertStat('c6042315ea9022d68a60bdac3bd07250', 50044544, 4.5, 'HS13', false);
+
+	const stats = await db.getAllStats(50030855);
+
+	t.is(stats.total.passed, 2);
+});
