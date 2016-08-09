@@ -93,7 +93,20 @@ test('Should correctly insert statistics', async t => {
 	t.is(stats.total.average, 4.14);
 });
 
-test('Weird schema should work', async t => {
+test('Irrelevant statistic should not influence', async t => {
+	await db.insertPredefined({
+		source: 'Test statistic',
+		points: [
+			{
+				module: 123456,
+				comment: 'Test module',
+				passed: 1,
+				failed: 0,
+				average: 6,
+				semester: 'HS14'
+			}
+		]
+	});
 	await db.insertStat('da17d6edea42bf74fcd26015a9975030', 50044544, 4.25, 'HS14', false);
 	await db.insertStat('da17d6edea42bf74fcd26015a9975030', 50044544, 2.75, 'HS13', false);
 	await db.insertStat('c6042315ea9022d68a60bdac3bd07250', 50044544, 4.5, 'HS13', false);
