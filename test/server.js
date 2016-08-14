@@ -125,21 +125,6 @@ test('Should reject payload without semester', async t => {
 	t.is(postResponse.status, 400);
 });
 
-test('Should reject payload without module', async t => {
-	const badPayload = {
-		user: md5('joburg'),
-		grades: [
-			{
-				semester: 'FS14',
-				grade: 5
-			}
-		]
-	};
-
-	let postResponse = await doInsert(badPayload);
-	t.is(postResponse.status, 400);
-});
-
 test('Should reject empty payload', async t => {
 	const badPayload = {};
 
