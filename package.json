@@ -38,7 +38,7 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "ava": "^0.15.1",
+    "ava": "^0.22.0",
     "xo": "^0.15.0"
   }
 }

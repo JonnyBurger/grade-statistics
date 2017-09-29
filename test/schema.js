@@ -39,14 +39,14 @@ test('Should not allow two entries from the same person', async t => {
 	const result = await db.insertStat(md5('joburg'), 50314925, 4.5, 'HS15', false);
 	t.is(result.command, 'INSERT');
 
-	t.throws(db.insertStat(md5('joburg'), 50314925, 5, 'HS15', false));
+	await t.throws(db.insertStat(md5('joburg'), 50314925, 5, 'HS15', false));
 });
 
 test('Should allow two entries if it is a Wiederholungsprüfung', async t => {
 	const result = await db.insertStat(md5('joburg'), 50314925, 4.5, 'HS15', false);
 	t.is(result.command, 'INSERT');
 
-	t.notThrows(db.insertStat(md5('joburg'), 50314925, 5, 'HS15', true));
+	await t.notThrows(db.insertStat(md5('joburg'), 50314925, 5, 'HS15', true));
 });
 
 test('Should tell me if I am opted out', async t => {
