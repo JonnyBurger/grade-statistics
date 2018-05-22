@@ -29,7 +29,8 @@ function doDelete(user) {
 	return fetch('http://localhost:2000', {
 		method: 'DELETE',
 		body: JSON.stringify({
-			user: md5(user)
+			user: md5(user),
+			institution: 'UZH'
 		}),
 		headers: {
 			'Content-Type': 'application/json'
@@ -41,7 +42,8 @@ function doOptedInRequest(user) {
 	return fetch('http://localhost:2000/opted-in', {
 		method: 'POST',
 		body: JSON.stringify({
-			user: md5(user)
+			user: md5(user),
+			institution: 'UZH'
 		}),
 		headers: {
 			'Content-Type': 'application/json'
@@ -58,7 +60,8 @@ test('Should allow insertion of modules', async t => {
 				semester: 'FS15',
 				grade: 4
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 	let postResponse = await doInsert(payload);
 	var postStatus = postResponse.status;
@@ -78,6 +81,41 @@ test('Should allow insertion of modules', async t => {
 	t.is(getJson.success, true);
 });
 
+test('Should allow insertion of ETH modules', async t => {
+	const payload = {
+		user: md5('joburg'),
+		grades: [
+			{
+				module: 50030855,
+				semester: 'FS15',
+				grade: 4
+			}
+		],
+		institution: 'ETH'
+	};
+	let postResponse = await doInsert(payload);
+	var postStatus = postResponse.status;
+	var postJson = await postResponse.json();
+	t.deepEqual(postJson, {
+		success: true
+	});
+	t.is(postStatus, 200);
+
+	let getResponse = await fetch(`http://localhost:2000/ETH/50030855`);
+	var getJson = await getResponse.json();
+	t.is(getResponse.status, 200);
+	t.is(getJson.total.passed, 1);
+	t.is(getJson.total.failed, 0);
+	t.is(getJson.total.average, 4);
+	t.is(getJson.detailed.length, 1);
+	t.is(getJson.success, true);
+	// No accidential UZH insertions
+	let getResponse2 = await fetch(`http://localhost:2000/50030855`);
+	var getJson2 = await getResponse2.json();
+	t.is(getResponse2.status, 200);
+	t.is(getJson2.total.passed, 0);
+});
+
 test('Should not allow insertion of grade bigger than 6', async t => {
 	const payload = {
 		user: md5('joburg'),
@@ -87,7 +125,8 @@ test('Should not allow insertion of grade bigger than 6', async t => {
 				semester: 'FS14',
 				grade: 7
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	let postResponse = await doInsert(payload);
@@ -103,7 +142,8 @@ test('Should reject payload without username', async t => {
 				semester: 'FS14',
 				grade: 5
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	let postResponse = await doInsert(badPayload);
@@ -118,7 +158,8 @@ test('Should reject payload without semester', async t => {
 				module: 50030856,
 				grade: 5
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	let postResponse = await doInsert(badPayload);
@@ -141,7 +182,8 @@ test('Should reject invalid semester', async t => {
 				semester: 'bestande',
 				grade: 5
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	let postResponse = await doInsert(payload);
@@ -157,7 +199,8 @@ test('Should not be able to overwrite semester', async t => {
 				semester: 'FS15',
 				grade: 4
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	let firstResponse = await doInsert(firstPayload);
@@ -171,7 +214,8 @@ test('Should not be able to overwrite semester', async t => {
 				semester: 'FS15',
 				grade: 5
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	await doInsert(secondPayload);
@@ -190,7 +234,8 @@ test('Should be able to delete own grades', async t => {
 				semester: 'FS15',
 				grade: 4
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 	let firstResponse = await doInsert(firstPayload);
 	t.is(firstResponse.status, 200);
@@ -213,7 +258,8 @@ test('Should count opt-outs correctly', async t => {
 				semester: 'FS15',
 				grade: 4
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 	await doInsert(payload);
 	await doDelete('joburg');
@@ -243,7 +289,8 @@ test('Should not allow opt-out after max opt-outs', async t => {
 				semester: 'FS15',
 				grade: 4
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	for (let i = 0; i < MAX_OPTOUTS; i++) {
@@ -265,7 +312,8 @@ test('User should be a md5 hash', async t => {
 				semester: 'FS15',
 				grade: 4
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 	let response = await doInsert(payload);
 	let json = await response.json();
@@ -282,7 +330,8 @@ test('Should tell me whether I am opted in', async t => {
 				semester: 'FS15',
 				grade: 4
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 	await doInsert(payload);
 
@@ -298,7 +347,8 @@ test('Should handle Wiederholungsprüfungen', async t => {
 			{semester: 'HS15', module: '50335165', grade: 4.5},
 			{semester: 'HS15', module: '50332398', grade: 4},
 			{semester: 'HS15', module: '50335165', grade: 3}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	let response = await doInsert(payload);
@@ -310,7 +360,8 @@ test('Should allow to insert new grades', async t => {
 		user: md5('joburg'),
 		grades: [
 			{semester: 'HS15', module: '50335165', grade: 4}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	let response = await doInsert(payload);
@@ -321,7 +372,8 @@ test('Should allow to insert new grades', async t => {
 		grades: [
 			{semester: 'HS15', module: '50335165', grade: 4},
 			{semester: 'FS16', module: '50332398', grade: 5}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	let response2 = await doInsert(payload2);
@@ -345,7 +397,8 @@ test('Should reject hash of empty string', async t => {
 		user: md5(''),
 		grades: [
 			{semester: 'HS15', module: '50332398', grade: 4}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	let response = await doInsert(payload);
@@ -357,7 +410,8 @@ test('Should reject hash of demo account', async t => {
 		user: md5('bestande'),
 		grades: [
 			{semester: 'HS15', module: '50332398', grade: 4}
-		]
+		],
+		institution: 'UZH'
 	};
 
 	let response = await doInsert(payload);

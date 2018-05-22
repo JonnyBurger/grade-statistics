@@ -8,13 +8,13 @@ test.beforeEach(async () => {
 });
 
 test('Should calculate stats correctly', async t => {
-	await db.insertStat(md5('joburg'), 50314925, 4, 'HS15', false);
-	await db.insertStat(md5('jabond'), 50314925, 4.5, 'HS15', false);
-	await db.insertStat(md5('abcdef'), 50314925, 3, 'HS15', false);
-	await db.insertStat(md5('xyzabc'), 50314925, 6, 'HS14', false);
-	await db.insertStat(md5('xyzabd'), 50314922, 5, 'HS15', false);
+	await db.insertStat(md5('joburg'), 50314925, 4, 'HS15', false, 'UZH');
+	await db.insertStat(md5('jabond'), 50314925, 4.5, 'HS15', false, 'UZH');
+	await db.insertStat(md5('abcdef'), 50314925, 3, 'HS15', false, 'UZH');
+	await db.insertStat(md5('xyzabc'), 50314925, 6, 'HS14', false, 'UZH');
+	await db.insertStat(md5('xyzabd'), 50314922, 5, 'HS15', false, 'UZH');
 
-	const result = await db.getStatsBySemester(50314925);
+	const result = await db.getStatsBySemester(50314925, 'UZH');
 	t.is(result.rows[0].semester, 'HS15');
 	t.is(result.rows[0].average, 3.83);
 	t.is(result.rows[0].passed, 2);
@@ -27,7 +27,7 @@ test('Should calculate stats correctly', async t => {
 	t.is(result.rows[1].failed, 0);
 	t.is(result.rows[1].count, 1);
 
-	const result2 = await db.getStatsBySemester(50314922);
+	const result2 = await db.getStatsBySemester(50314922, 'UZH');
 	t.is(result2.rows[0].semester, 'HS15');
 	t.is(result2.rows[0].average, 5);
 	t.is(result2.rows[0].passed, 1);
@@ -36,38 +36,42 @@ test('Should calculate stats correctly', async t => {
 });
 
 test('Should not allow two entries from the same person', async t => {
-	const result = await db.insertStat(md5('joburg'), 50314925, 4.5, 'HS15', false);
+	const result = await db.insertStat(md5('joburg'), 50314925, 4.5, 'HS15', false, 'UZH');
 	t.is(result.command, 'INSERT');
 
-	await t.throws(db.insertStat(md5('joburg'), 50314925, 5, 'HS15', false));
+	await t.throws(db.insertStat(md5('joburg'), 50314925, 5, 'HS15', false, 'UZH'));
 });
 
 test('Should allow two entries if it is a Wiederholungsprüfung', async t => {
-	const result = await db.insertStat(md5('joburg'), 50314925, 4.5, 'HS15', false);
+	const result = await db.insertStat(md5('joburg'), 50314925, 4.5, 'HS15', false, 'UZH');
 	t.is(result.command, 'INSERT');
 
-	await t.notThrows(db.insertStat(md5('joburg'), 50314925, 5, 'HS15', true));
+	await t.notThrows(db.insertStat(md5('joburg'), 50314925, 5, 'HS15', true, 'UZH'));
 });
 
 test('Should tell me if I am opted out', async t => {
-	const result = await db.studentIsOptedIn(md5('joburg'));
+	const result = await db.studentIsOptedIn(md5('joburg'), 'UZH');
 	t.is(result, false);
 });
 
 test('Should tell me if I am opted in', async t => {
-	await db.insertStat(md5('joburg'), 50314925, 4, 'HS15', false);
-	const result = await db.studentIsOptedIn(md5('joburg'));
+	await db.insertStat(md5('joburg'), 50314925, 4, 'HS15', false, 'UZH');
+	const result = await db.studentIsOptedIn(md5('joburg'), 'UZH');
 	t.is(result, true);
 });
 
 test('Should track an opt-out', async t => {
-	await db.addOptOut(md5('joburg'));
-	const optOuts = await db.studentOptOutCount(md5('joburg'));
+	await db.addOptOut(md5('joburg'), 'UZH');
+	const optOuts = await db.studentOptOutCount(md5('joburg'), 'UZH');
 	t.is(optOuts, 1);
 
-	await db.addOptOut(md5('joburg'));
-	const optOuts2 = await db.studentOptOutCount(md5('joburg'));
+	await db.addOptOut(md5('joburg'), 'UZH');
+	const optOuts2 = await db.studentOptOutCount(md5('joburg'), 'UZH');
 	t.is(optOuts2, 2);
+
+	await db.addOptOut(md5('joburg'), 'ETH');
+	const optOuts3 = await db.studentOptOutCount(md5('joburg'), 'ETH');
+	t.is(optOuts3, 1);
 });
 
 test('Should correctly insert statistics', async t => {
@@ -82,13 +86,15 @@ test('Should correctly insert statistics', async t => {
 				average: 4.14,
 				semester: 'FS14'
 			}
-		]
+		],
+		institution: 'UZH'
 	};
 	await db.insertPredefined(statistic);
-	await db.insertStat(md5('joburg'), 50030855, 6, 'FS15', false);
-	await db.insertStat(md5('joburg'), 50030855, 3.5, 'FS14', false);
-	await db.insertStat(md5('joburg'), 50030855, 6, 'FS13', false);
-	const stats = await db.getAllStats(50030855);
+	await db.insertStat(md5('joburg'), 50030855, 6, 'FS15', false, 'UZH');
+	await db.insertStat(md5('joburg'), 50030855, 3.5, 'FS14', false, 'UZH');
+	await db.insertStat(md5('joburg'), 50030855, 6, 'FS13', false, 'UZH');
+
+	const stats = await db.getAllStats(50030855, 'UZH');
 	t.is(stats.total.passed, 666);
 	t.is(stats.total.average, 4.14);
 });
@@ -105,13 +111,24 @@ test('Irrelevant statistic should not influence', async t => {
 				average: 6,
 				semester: 'HS14'
 			}
-		]
+		],
+		institution: 'UZH'
 	});
-	await db.insertStat('da17d6edea42bf74fcd26015a9975030', 50044544, 4.25, 'HS14', false);
-	await db.insertStat('da17d6edea42bf74fcd26015a9975030', 50044544, 2.75, 'HS13', false);
-	await db.insertStat('c6042315ea9022d68a60bdac3bd07250', 50044544, 4.5, 'HS13', false);
+	await db.insertStat('da17d6edea42bf74fcd26015a9975030', 50044544, 4.25, 'HS14', false, 'UZH');
+	await db.insertStat('da17d6edea42bf74fcd26015a9975030', 50044544, 2.75, 'HS13', false, 'UZH');
+	await db.insertStat('c6042315ea9022d68a60bdac3bd07250', 50044544, 4.5, 'HS13', false, 'UZH');
 
-	const stats = await db.getAllStats(50044544);
+	const stats = await db.getAllStats(50044544, 'UZH');
 
 	t.is(stats.total.passed, 2);
+});
+
+test('Should work with more universities', async t => {
+	await db.insertStat('da17d6edea42bf74fcd26015a9975030', 50044544, 4.25, 'HS14', false, 'UZH');
+	await db.insertStat('da17d6edea42bf74fcd26015a9975030', 50044544, 4.25, 'HS14', false, 'ETH');
+
+	const stats = await db.getAllStats(50044544, 'UZH');
+	const stats2 = await db.getAllStats(50044544, 'ETH');
+	t.is(stats.total.passed, 1);
+	t.is(stats2.total.passed, 1);
 });
