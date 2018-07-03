@@ -5,6 +5,6 @@ services:
   - postgresql
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
-  - psql -f median.sql -U postgres -D travis_ci_test
+  - psql -f median.sql -U postgres -d travis_ci_test
 env:
   - PG_USER=postgres PG_DATABASE=travis_ci_test PGHOST=localhost
