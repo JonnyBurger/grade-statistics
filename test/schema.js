@@ -120,7 +120,6 @@ test('Should correctly insert statistics', async t => {
 	t.is(stats.total.average, 4.14);
 });
 
-
 test('Irrelevant statistic should not influence', async t => {
 	await db.insertPredefined({
 		source: 'Test statistic',
