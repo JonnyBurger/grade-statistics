@@ -35,6 +35,27 @@ test('Should calculate stats correctly', async t => {
 	t.is(result2.rows[0].count, 1);
 });
 
+test('Batch inserting should work correctly', async t => {
+	await db.insertStats([
+		[md5('joburg'), 50314925, 4, 'HS15', false, 'UZH'],
+		[md5('joburg'), 50314926, 4, 'HS15', false, 'UZH'],
+		[md5('joburg'), 50314927, 4, 'HS15', false, 'UZH'],
+		[md5('joburg'), 50314928, 4, 'HS15', false, 'UZH']
+	]);
+	// some duplicates, some new
+	await db.insertStats([
+		[md5('joburg'), 50314925, 4, 'HS15', false, 'UZH'],
+		[md5('joburg'), 50314930, 4, 'HS15', false, 'UZH'],
+		[md5('joburg'), 50314931, 4, 'HS15', false, 'UZH'],
+		[md5('joburg'), 50314928, 4, 'HS15', false, 'UZH']
+	]);
+
+	const result = await db.getStatsBySemester(50314925, 'UZH');
+	t.is(result.rows[0].count, 1);
+	const result2 = await db.getStatsBySemester(50314930, 'UZH');
+	t.is(result2.rows[0].count, 1);
+});
+
 test('Should not allow two entries from the same person', async t => {
 	const result = await db.insertStat(md5('joburg'), 50314925, 4.5, 'HS15', false, 'UZH');
 	t.is(result.command, 'INSERT');
@@ -98,6 +119,7 @@ test('Should correctly insert statistics', async t => {
 	t.is(stats.total.passed, 666);
 	t.is(stats.total.average, 4.14);
 });
+
 
 test('Irrelevant statistic should not influence', async t => {
 	await db.insertPredefined({
