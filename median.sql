@@ -1,39 +1,37 @@
-BEGIN;
-
--- median
--- http://wiki.postgresql.org/wiki/Aggregate_Median
-
-CREATE OR REPLACE FUNCTION median(anyarray)
-   RETURNS float8 AS
+CREATE OR REPLACE FUNCTION array_median(numeric[])
+  RETURNS numeric AS
 $$
-  WITH q AS
-  (
-     SELECT val
-     FROM unnest($1) val
-     WHERE val IS NOT NULL
-     ORDER BY 1
-  ),
-  cnt AS
-  (
-    SELECT COUNT(*) AS c FROM q
-  )
-  SELECT AVG(val)::float8
-  FROM
-  (
-    SELECT val FROM q
-    LIMIT  2 - MOD((SELECT c FROM cnt), 2)
-    OFFSET GREATEST(CEIL((SELECT c FROM cnt) / 2.0) - 1,0)
-  ) q2;
+    SELECT CASE WHEN array_upper($1,1) = 0 THEN null ELSE asorted[ceiling(array_upper(asorted,1)/2.0)] END
+    FROM (SELECT ARRAY(SELECT ($1)[n] FROM
+generate_series(1, array_upper($1, 1)) AS n
+    WHERE ($1)[n] IS NOT NULL
+            ORDER BY ($1)[n]
+) As asorted) As foo ;
 $$
-LANGUAGE sql IMMUTABLE;
+  LANGUAGE 'sql' IMMUTABLE;
 
-DROP AGGREGATE IF EXISTS median(numeric); -- old method
-DROP AGGREGATE IF EXISTS median(anyelement);
-CREATE AGGREGATE median(anyelement) (
+
+CREATE OR REPLACE FUNCTION array_median(timestamp[])
+  RETURNS timestamp AS
+$$
+    SELECT CASE WHEN array_upper($1,1) = 0 THEN null ELSE asorted[ceiling(array_upper(asorted,1)/2.0)] END
+    FROM (SELECT ARRAY(SELECT ($1)[n] FROM
+generate_series(1, array_upper($1, 1)) AS n
+    WHERE ($1)[n] IS NOT NULL
+            ORDER BY ($1)[n]
+) As asorted) As foo ;
+$$
+  LANGUAGE 'sql' IMMUTABLE;
+
+
+CREATE AGGREGATE median(numeric) (
   SFUNC=array_append,
-  STYPE=anyarray,
-  FINALFUNC=median,
-  INITCOND='{}'
+  STYPE=numeric[],
+  FINALFUNC=array_median
 );
 
-COMMIT;
+CREATE AGGREGATE median(timestamp) (
+  SFUNC=array_append,
+  STYPE=timestamp[],
+  FINALFUNC=array_median
+);
