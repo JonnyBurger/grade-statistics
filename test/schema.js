@@ -102,20 +102,6 @@ test.serial('Should tell me if I am opted in', async t => {
 	t.is(result, true);
 });
 
-test.serial('Should track an opt-out', async t => {
-	await db.addOptOut(md5('joburg'), 'UZH');
-	const optOuts = await db.studentOptOutCount(md5('joburg'), 'UZH');
-	t.is(optOuts, 1);
-
-	await db.addOptOut(md5('joburg'), 'UZH');
-	const optOuts2 = await db.studentOptOutCount(md5('joburg'), 'UZH');
-	t.is(optOuts2, 2);
-
-	await db.addOptOut(md5('joburg'), 'ETH');
-	const optOuts3 = await db.studentOptOutCount(md5('joburg'), 'ETH');
-	t.is(optOuts3, 1);
-});
-
 test.serial('Should correctly insert statistics', async t => {
 	const statistic = {
 		source: 'oecnews Nr. 124',

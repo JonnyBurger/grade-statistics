@@ -4,7 +4,6 @@ const test = require('ava');
 const fetch = require('node-fetch');
 const server = require('../lib/server');
 const db = require('../lib/db');
-const {MAX_OPTOUTS} = require('../lib/config');
 
 test.beforeEach(async () => {
 	await db.reset();
@@ -270,39 +269,6 @@ test('Should count opt-outs correctly', async t => {
 	const response = await doOptedInRequest('joburg');
 	const json = await response.json();
 	t.is(json.optedIn, false);
-	t.is(json.optOuts, 2);
-});
-
-test('Should not count opt-out if not opted in', async t => {
-	await doDelete('joburg');
-	const response = await doOptedInRequest('joburg');
-	const json = await response.json();
-	t.is(json.optOuts, 0);
-});
-
-test('Should not allow opt-out after max opt-outs', async t => {
-	const payload = {
-		user: md5('joburg'),
-		grades: [
-			{
-				module: 50030855,
-				semester: 'FS15',
-				grade: 4
-			}
-		],
-		institution: 'UZH'
-	};
-
-	for (let i = 0; i < MAX_OPTOUTS; i++) {
-		// eslint-disable-next-line no-await-in-loop
-		await doInsert(payload);
-		// eslint-disable-next-line no-await-in-loop
-		await doDelete('joburg');
-	}
-
-	await doInsert(payload);
-	const response = await doDelete('joburg');
-	t.is(response.status, 400);
 });
 
 test('User should be a md5 hash', async t => {
