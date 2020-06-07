@@ -9,9 +9,6 @@
     "email": "jonathanburger11@gmail.com",
     "url": "jonny.io"
   },
-  "engines": {
-    "node": ">=8.0.0"
-  },
   "scripts": {
     "test": "xo --fix && TEST=true ava --serial",
     "import": "node lib/insert-data.js",
