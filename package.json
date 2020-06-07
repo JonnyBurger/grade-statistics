@@ -13,7 +13,7 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "xo --fix && ava --serial",
+    "test": "xo --fix && TEST=true ava --serial",
     "import": "node lib/insert-data.js",
     "init": "node lib/init.js"
   },
@@ -34,11 +34,11 @@
     "junk": "^1.0.3",
     "md5": "^2.1.0",
     "node-fetch": "^1.5.3",
-    "pg": "^6.0.1",
+    "pg": "^8.2.1",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "ava": "^0.22.0",
+    "ava": "^3.8.2",
     "xo": "^0.15.0"
   }
 }
