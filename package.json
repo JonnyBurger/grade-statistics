@@ -7,7 +7,7 @@
   "author": {
     "name": "Jonny Burger",
     "email": "jonathanburger11@gmail.com",
-    "url": "jonny.io"
+    "url": "https://jonny.io"
   },
   "scripts": {
     "test": "xo --fix && TEST=true ava --serial",

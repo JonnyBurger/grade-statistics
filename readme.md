@@ -1,3 +1,8 @@
+*DEPRECATED* The code has been inlined into the Bestande codebase, this public repo will no longer be updated.
+
+
+------
+
 # grade-statistics [![Build Status](https://travis-ci.org/JonnyBurger/grade-statistics.svg?branch=master)](https://travis-ci.org/JonnyBurger/grade-statistics)
 
 > System for collecting grades and creating statistics
